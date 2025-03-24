@@ -41,7 +41,10 @@ export default function Investments() {
   const [stockPrices, setStockPrices] = useState<{ [key: string]: { price: number; growth: number } }>(
     indianStocks.reduce((acc, stock) => ({
       ...acc,
-      [stock.symbol]: { price: Math.random() * 2000 + 1000, growth: (Math.random() - 0.5) * 0.1 }
+      [stock.symbol]: { 
+        price: Math.random() * 900 + 100, // Reduced range: 100-1000 INR
+        growth: (Math.random() - 0.5) * 0.01 // Reduced range: -0.5% to +0.5%
+      }
     }), {})
   );
 
@@ -67,18 +70,18 @@ export default function Investments() {
       setStockPrices((prev) => {
         const newPrices = { ...prev };
         indianStocks.forEach((stock) => {
-          const basePrice = newPrices[stock.symbol]?.price || Math.random() * 2000 + 1000;
-          const growth = newPrices[stock.symbol]?.growth || (Math.random() - 0.5) * 0.1;
+          const basePrice = newPrices[stock.symbol]?.price || Math.random() * 900 + 100;
+          const growth = newPrices[stock.symbol]?.growth || (Math.random() - 0.5) * 0.01; // Minute shift: -0.5% to +0.5%
           newPrices[stock.symbol] = {
             price: Math.max(100, basePrice * (1 + growth / 100)),
-            growth: (Math.random() - 0.5) * 0.1,
+            growth: (Math.random() - 0.5) * 0.01, // New minute growth
           };
         });
         return newPrices;
       });
     };
 
-    const interval = setInterval(updateStockPrices, 5000);
+    const interval = setInterval(updateStockPrices, 5000); // Updates every 5 seconds
     return () => clearInterval(interval);
   }, []);
 
@@ -87,7 +90,7 @@ export default function Investments() {
     let totalLoss = 0;
     userData?.portfolio?.investments?.forEach((inv: any) => {
       const currentPrice = stockPrices[inv.stock]?.price;
-      if (!currentPrice) return; // Skip if stock price is undefined
+      if (!currentPrice) return; // Skip if undefined
       const investedValue = inv.amount;
       const currentValue = (investedValue / inv.initialPrice) * currentPrice;
       const diff = currentValue - investedValue;
@@ -208,7 +211,7 @@ export default function Investments() {
   const handleTransferToAccount = async () => {
     const portfolioBalance = userData.portfolio?.balance || 0;
     const totalInvestedValue = userData.portfolio?.investments?.reduce((sum: number, inv: any) => {
-      const currentPrice = stockPrices[inv.stock]?.price || inv.initialPrice; // Fallback to initialPrice if undefined
+      const currentPrice = stockPrices[inv.stock]?.price || inv.initialPrice;
       return sum + (inv.amount / inv.initialPrice) * currentPrice;
     }, 0) || 0;
     const totalInvestedAmount = userData.portfolio.investments.reduce((sum: number, inv: any) => sum + inv.amount, 0) || 0;
@@ -369,7 +372,7 @@ export default function Investments() {
           {userData.portfolio?.investments?.length ? (
             <div className="space-y-4">
               {userData.portfolio.investments.map((inv: any, index: number) => {
-                const currentPrice = stockPrices[inv.stock]?.price || inv.initialPrice; // Fallback to initialPrice
+                const currentPrice = stockPrices[inv.stock]?.price || inv.initialPrice;
                 const currentValue = (inv.amount / inv.initialPrice) * currentPrice;
                 const profitLoss = currentValue - inv.amount;
                 return (
